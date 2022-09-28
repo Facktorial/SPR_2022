@@ -1,9 +1,18 @@
 ## To Do
 
 - Update README
-- Create tests
-- Implement initial code
-- Push to git
+    > More describing would be good
+- cmake
+    * [ ] cultivate cmake
+    * [ ] handle -Werror=C++20-standard
+    * [ ] assembling final online-judge code from lib
+- Tasks 01
+    * [ ] Minesweaper
+    * [x] Endians
+    * [ ] Check the check
 
 ## Done
 
+- Implement initial code
+- Git
+- Tests

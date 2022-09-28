@@ -23,6 +23,10 @@ IF (BUILD_DOC)
     enable_doxygen()
 ENDIF (BUILD_DOC)
 
+
+set(SUBMIT_FOLDER tasks-independent)
+
+
 #include(cmake_problems/minesweaper.cmake)
 include(cmake_problems/endians.cmake)
-#include(cmake_problems/check_the_check.cmake)
+include(cmake_problems/check_the_check.cmake)

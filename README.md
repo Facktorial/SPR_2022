@@ -15,6 +15,7 @@ Tested with "doctest.h".
 
 ## Features
  -[`cmake`](https://cmake.org/) for building project
+
  -[`doctest`](https://github.com/doctest/doctest) for testing of the tasks
 
 

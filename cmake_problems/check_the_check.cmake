@@ -1,8 +1,6 @@
-set(TASK_NAME One_Little_Endian)
-set(TASK_NAME_DEV One_Little_Endian_dev)
-set(SRC_name endians)
-
-set(SUBMIT_FOLDER tasks-independent)
+set(TASK_NAME Check_the_check)
+set(TASK_NAME_DEV Check_the_check_dev)
+set(SRC_name check_the_check)
 
 set(SRC_dev
 	"${CMAKE_PROJECT_NAME}/${TASK_NAME}/${SRC_name}_dev.cpp"
@@ -40,6 +38,8 @@ message(CXX_FLAGS: ${CMAKE_CXX_FLAGS})
 
 add_executable(${TASK_NAME} ${SRC} ${HEADERS})
 add_executable("tests_${TASK_NAME}" ${TESTS} ${HEADERS})
+
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${FLAGS_BACKUP}")
 

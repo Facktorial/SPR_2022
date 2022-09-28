@@ -94,11 +94,7 @@ INT_SIZE endian2(INT_SIZE data)
 	} lf;
 
 	lf.val = data;
-	/*
-	 * endians.cpp:72:43: warning: comparison of integers of different signs: 'int' and 'unsigned long' [-Wsign-compare]
-	 *         for (i = 0, i2 = sizeof(INT_SIZE) - 1; i < sizeof(INT_SIZE) / 2; i++, i2--)
-	 *                                                ~ ^ ~~~~~~~~~~~~~~~~~~~~
-	 */
+
 	for (i = 0, i2 = sizeof(INT_SIZE) - 1; i < sizeof(INT_SIZE) / 2; i++, i2--)
 	{
 		tmp = lf.bytes[i];

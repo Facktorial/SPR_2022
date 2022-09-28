@@ -40,8 +40,8 @@ std::string handle_input(std::string data)
 	std::stringstream ss(data);
 	std::stringstream output;
 
-	auto x = { 1, 2, 3 };
-	for (auto i = 0; auto xx : x) {}
+	//auto x = { 1, 2, 3 };
+	//for (auto i = 0; auto xx : x) {}
 
 	while(!ss.eof())
 	{
@@ -74,8 +74,6 @@ INT_SIZE endian(INT_SIZE n)
 	uint32_t num = static_cast<uint32_t>(n);
 	/*
 	 * endians.cpp:54:83: warning: implicit conversion changes signedness: 'unsigned int' to 'int' [-Wsign-conversion]
-	 *     return (((num) >> 24) | ((num << 8) & 0x00FF0000) | ((num >> 8) & 0x0000FF00) | ((num) << 24));
-	 *     ~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
 	 */
     return (((num) >> 24) | ((num << 8) & 0x00FF0000) | ((num >> 8) & 0x0000FF00) | ((num) << 24));
 }
@@ -95,11 +93,7 @@ INT_SIZE endian2(INT_SIZE data)
 	} lf;
 
 	lf.val = data;
-	/*
-	 * endians.cpp:72:43: warning: comparison of integers of different signs: 'int' and 'unsigned long' [-Wsign-compare]
-	 *         for (i = 0, i2 = sizeof(INT_SIZE) - 1; i < sizeof(INT_SIZE) / 2; i++, i2--)
-	 *                                                ~ ^ ~~~~~~~~~~~~~~~~~~~~
-	 */
+
 	for (i = 0, i2 = sizeof(INT_SIZE) - 1; i < sizeof(INT_SIZE) / 2; i++, i2--)
 	{
 		tmp = lf.bytes[i];
