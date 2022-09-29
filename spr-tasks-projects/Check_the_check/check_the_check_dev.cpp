@@ -17,6 +17,8 @@ enum class Color
 	White
 };
 
+static Color oposite_color(Color c) { return (c == Color::White ? Color::Black : Color::White); }
+
 struct Pair
 {
 	Pair(int xx, int yy) : x(xx), y(yy) {}
@@ -27,11 +29,12 @@ struct Pair
 
 struct Figure
 {
-	Figure(int x, int y, Color color) : m_color(color), m_x(x), m_y(y){}
+	Figure(int x, int y, Color color) : m_color(color), m_x(x), m_y(y) {}
 	virtual ~Figure(){}
 
 	bool is_king() { return false; }
-	bool is_horseman() { return false; }
+	// FIXME m_horse
+	bool is_horseman() { return m_horse; }
 	//auto position() const { return std::make_tuple(m_x, m_y); }
 	std::tuple<int, int> position() const { return std::make_tuple(m_x, m_y); }
 
@@ -40,11 +43,13 @@ struct Figure
 	Color m_color;
 	int m_x;
 	int m_y;
+	bool m_horse = false;
 };
 
 struct King: public Figure
 {
-	King(int x, int y, Color color) : Figure(x, y, color){}
+	// FIXME m_horse
+	King(int x, int y, Color color) : Figure(x, y, color) { m_horse = true; }
 	bool is_king() { return true; }
 	bool can_check(int kingx, int kingy) override
 	{
@@ -64,8 +69,7 @@ struct Bischop: public Figure
 	Bischop(int x, int y, Color color) : Figure(x, y, color){}
 	bool can_check(int kingx, int kingy) override
 	{
-		//std::cout << condition_ret(m_x - kingx == m_y - kingy);
-		return (m_x - kingx == m_y - kingy);
+		return (abs(m_x - kingx) == abs(m_y - kingy));
 	}
 };
 
@@ -74,7 +78,6 @@ struct Rook: public Figure
 	Rook(int x, int y, Color color) : Figure(x, y, color){}
 	bool can_check(int kingx, int kingy) override
 	{
-		//std::cout << "ROOK " << condition_ret(m_x == kingx || m_y == kingy) << '\n';
 		return (m_x == kingx || m_y == kingy);
 	}
 };
@@ -84,7 +87,6 @@ struct Queen: public Figure
 	Queen(int x, int y, Color color) : Figure(x, y, color){}
 	bool can_check(int kingx, int kingy) override
 	{
-		//std::cout << "QUEEN:" << condition_ret(abs(m_x - kingx) == abs(m_y - kingy) || m_x == kingx || m_y == kingy);
 		return (abs(m_x - kingx) == abs(m_y - kingy) || m_x == kingx || m_y == kingy);
 	}
 };
@@ -94,17 +96,11 @@ struct Pawn: public Figure
 	Pawn(int x, int y, Color color) : Figure(x, y, color){}
 	bool can_check(int kingx, int kingy) override
 	{
-		if (m_color == Color::White && m_y < kingy) { return false; };
-		if (m_color == Color::Black && m_y > kingy) { return false; };
+		if (m_color == Color::White && m_y < kingy) { return false; }
+		if (m_color == Color::Black && m_y > kingy) { return false; }
 
-		//std::cout << "PAWN: " << condition_ret(
-				//(kingx == m_x - 1 || kingx == m_x + 1) && (kingy == m_y - 1 or kingy == m_y + 1)
-				//&& (m_color == "WHITE" ? kingy == m_y - 1 : kingy == m_y + 1)
-		//) << (m_color == "WHITE" ? "WHITE" : "BLACK");
 		return (
-				(kingx == m_x - 1 || kingx == m_x + 1) && (kingy == m_y - 1 or kingy == m_y + 1)
-				//(kingx == m_x - 1 or kingx == m_x + 1)
-				//&& (m_color == "WHITE" ? kingy == m_y - 1 : kingy == m_y + 1)
+			(kingx == m_x - 1 || kingx == m_x + 1) && (kingy == m_y - 1 or kingy == m_y + 1)
 		);
 	}
 };
@@ -189,10 +185,11 @@ struct Board
 					    case 'q': figure = new Queen(i, j, Color::Black); break;
 					    case 'R': figure = new Rook(i, j, Color::White); break;
 					    case 'r': figure = new Rook(i, j, Color::Black); break;
-					    case 'B': figure = new Queen(i, j, Color::White); break;
-					    case 'b': figure = new Queen(i, j, Color::Black); break;
-					    case 'N': figure = new Knight(i, j, Color::White); break;
-					    case 'n': figure = new Knight(i, j, Color::Black); break;
+					    case 'B': figure = new Bischop(i, j, Color::White); break;
+					    case 'b': figure = new Bischop(i, j, Color::Black); break;
+						// FIXME, i dont udenrstand OOP i guess
+					    case 'N': figure = new Knight(i, j, Color::White); figure->m_horse = true; break;
+					    case 'n': figure = new Knight(i, j, Color::Black); figure->m_horse = true; break;
 					    case 'P': figure = new Pawn(i, j, Color::White); break;
 					    case 'p': figure = new Pawn(i, j, Color::Black); break;
 					}
@@ -241,12 +238,14 @@ struct Board
 	        {
 				Figure* figure = figures.at((static_cast<unsigned long>((y + y1) * m_size.x) + static_cast<unsigned int>(x + x1)));
 	            if (figure != nullptr)
-	                if (figure->m_color == (color == Color::White ? Color::Black : Color::White) && figure->is_horseman())
+				{
+	                if ((figure->m_color == oposite_color(color)) && figure->is_horseman())
 					{
 						return true;
-					}
-	        }
-	    }
+					}	
+				}
+			}
+		}
 	    return false;
 	}
 	
@@ -277,31 +276,14 @@ struct Board
 	    while (keep_finding)
 	    {
 			Figure* figure = figures.at(static_cast<unsigned int>(y * (m_size.y)) + static_cast<unsigned int>(x));
-			if (figure != nullptr)
-			{
-			   // if (figure->can_check(std::get<0>(f->position()), std::get<1>(f->position())))
-			   // {
-			   //     std::cout << "X: " << std::get<0>(figure->position()) << " Y: " << std::get<1>(figure->position()) << '\n';
-			   //     std::cout << "X1: " << x << " Y1: " << y << '\n';
-			   // }
 
-			}
 	        if (figure != nullptr && (x != f->m_x || y != f->m_y))
 	        {
 	            if (figure->can_check(f->m_x, f->m_y) && (figure->m_color == (color == Color::White ? Color::Black : Color::White)))
 				{
-					// std::cout << "PROPIS???\n";
-					// std::cout << (color == Color::White ? "WHITE\n" : "BLACK\n");
-					// std::cout << "i:" << i << " j: " << j << "\n";
-					// std::cout << "X:" << x << " Y: " << y << "\n";
-					// std::cout << "x: " << f->m_x << " y: " << f->m_y << "\n";
-					// std::cout << "------\n";
 	                return true;
 				}
-	            if (figure->m_color == color)
-				{
-					return false;
-				}
+				return false;
 	        }
 	        x += i;
 	        y += j;
