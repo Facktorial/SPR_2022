@@ -27,6 +27,8 @@ ENDIF (BUILD_DOC)
 set(SUBMIT_FOLDER tasks-independent)
 
 
-#include(cmake_problems/minesweaper.cmake)
 include(cmake_problems/endians.cmake)
 include(cmake_problems/check_the_check.cmake)
+#include(cmake_problems/meta_loopless_sort.cmake)
+include(cmake_problems/minesweeper.cmake)
+#include(cmake_problems/paper_folding.cmake)

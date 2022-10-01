@@ -340,7 +340,9 @@ static std::string check_the_check()
 	Board board = Board(8, 8);
 	[[maybe_unused]]  bool a = board.load();
 
-	return solve_problem(board);
+	std::string out = solve_problem(board);
+	std::cout << out << '\n';
+	return out;
 }
 
 static std::string check_the_check(std::string data)
