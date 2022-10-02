@@ -270,3 +270,9 @@ ps_exp3.pas(3,2) Error: Identifier not found "wr"
 ps_exp3.pas(3,5) Error: Identifier not found "iteln"
 ps_exp3.pas(5) Fatal: There were 2 errors compiling module, stopping
 Fatal: Compilation aborted
+Free Pascal Compiler version 3.2.2+dfsg-9ubuntu1 [2022/04/11] for x86_64
+Copyright (c) 1993-2021 by Florian Klaempfl and others
+Target OS: Linux for x86-64
+Compiling ps_exp3.pas
+Fatal: Cannot open file "ps_exp3.pas"
+Fatal: Compilation aborted
