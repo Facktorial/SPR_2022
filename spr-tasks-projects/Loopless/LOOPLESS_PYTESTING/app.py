@@ -1,6 +1,7 @@
 import os
 from subprocess import check_output
 from functools import partial
+from dataclasses import dataclass, field
 import pytest
 # import rich
 
@@ -11,6 +12,12 @@ LOGS_DIR = 'logs_dir'
 BINARY_DIR = 'binary'
 COMPILATION_ERROR = b'Fatal: Compilation aborted\n'
 SUFFIX = '.pas'
+
+
+@dataclass
+class DataTest:
+    test_inputs: list[str] = field(default_factory=list)
+    test_result: str
 
 
 def get_list_of_files() -> list[str]:
@@ -50,5 +57,35 @@ def solve() -> tuple[list[str], list[str]]:
 
     return (binaries, programs)
 
+
+def programs_output(inputs: list[str]) -> list[str]:
+    not_test_files: list[str] = [ filename for filename in get_list_of_files() if filename.find('testing_data') == -1 ]
+    output: list[str] = [ check_output([f'./{BINARY_DIR}/{filename.removesuffix(SUFFIX)}', f'< {inp}']) for (inp, filename) in zip(inputs, not_test_files) ]
+    print(output)
+    return output
+
+
+def parse_sort_test() -> DataTest:#list[tuple[str, str]]:
+    # output: list[tuple[str, str]] = []
+    output: list[DataTest] = []
+    test_files: list[str] = [ filename for filename in get_list_of_files() if filename.find('testing_data') != -1 ]
+
+    test_data: list[tuple[list[int]]] = [([], [])] * len(test_files)
+    for i, filename in enumerate(test_files):
+        with open(f'{DIR_PATH}/{FILES_DIR}/' + filename, "r") as file:
+            lines = file.readlines()
+            # tmp_in = [[ int(x) for x in line.split(' ')[:-1] ] for line in lines[:-2] ]
+            # tmp_out = [ int(x) for x in lines[-1].split(' ')[:-1] ]
+            # test_data[i] = (tmp_in, tmp_out) 
+            # output.append((','.join(map(str, tmp_in)), ','.join(map(str, tmp_out))))
+            tmp_in = lines[:-2]
+            tmp_out = lines[-1]
+            output.append(DataTest(tmp_in, tmp_out))
+
+    return output
+
+
+   
 if __name__ == '__main__':
-    main()
+    # main()
+    parse_sort_test()

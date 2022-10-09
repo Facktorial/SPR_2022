@@ -39,7 +39,7 @@ void test_cases_by_debug(std::vector<std::string> inputs, std::vector<std::strin
 }
 
 
-TEST_SUITE("Endians") {
+TEST_SUITE("Check the checks") {
 
 	TEST_CASE("Basic input") {
 		std::vector<std::string> inputs = {
@@ -908,6 +908,30 @@ TEST_SUITE("Endians") {
 		};
 
 		test_cases_by_debug(inputs, outcomes);
+	}
+
+	TEST_CASE("Sawa's insight") {
+		std::vector<std::string> inputs = {
+			"K.......\n"
+			"........\n"
+			".k......\n"
+			"........\n"
+			"........\n"
+			"........\n"
+			"........\n"
+			"........\n"
+			"........\n"
+		};
+
+		std::vector<std::string> outcomes = {
+			"no",
+		};
+
+		auto x = "\n" + inputs[0];
+
+		MESSAGE(x);
+		
+		test_cases_by_sets(inputs, outcomes);
 	}
 }
 

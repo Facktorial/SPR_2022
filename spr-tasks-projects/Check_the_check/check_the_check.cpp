@@ -48,8 +48,7 @@ struct Figure
 
 struct King: public Figure
 {
-	// FIXME m_horse
-	King(int x, int y, Color color) : Figure(x, y, color) { m_horse = true; }
+	King(int x, int y, Color color) : Figure(x, y, color) { }
 	bool is_king() { return true; }
 	bool can_check(int kingx, int kingy) override
 	{
@@ -341,7 +340,7 @@ static std::string check_the_check()
 	[[maybe_unused]]  bool a = board.load();
 
 	std::string out = solve_problem(board);
-	std::cout << out << '\n';
+	std::cout << out; // << '\n';
 	return out;
 }
 
