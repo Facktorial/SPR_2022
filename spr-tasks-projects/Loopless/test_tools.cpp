@@ -17,6 +17,13 @@ const std::filesystem::path cwd = std::filesystem::current_path();
 const std::string OUT_DIR = "ps_files";
 const std::string FILENAME = "united_free_pascal_codes";
 const std::string SUFFIX = ".pas";
+const std::string TEST_SUFFIX = ".test";
+
+
+static int factorial(int n)
+{
+	return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
+}
 
 
 // FIXME FUJKY
@@ -70,14 +77,20 @@ static std::string make_test_data([[ maybe_unused ]] int n)
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> distribution(0, n);
+	std::uniform_int_distribution<> distribution_10(0, 10);
 
 	std::stringstream ss;
 	auto seq = std::vector<unsigned int>(static_cast<unsigned int>(n));
-	auto cp_seq = std::vector<unsigned int>(static_cast<unsigned int>(n));
-	for (unsigned int i = 0; i < static_cast<unsigned int>(n); i++) { seq[i] = 1 + i; }
+	std::vector<unsigned int> cp_seq; // = std::vector<unsigned int>(static_cast<unsigned int>(n));
+	for (unsigned int i = 0; i < static_cast<unsigned int>(n); i++)
+	{
+		seq[i] = distribution_10(rd) + i * 10;
+	}
+
+	std::copy(seq.begin(), seq.end(), std::back_inserter(cp_seq));
 
 	std::string tmp;
-	for (unsigned int j = 0; (j < static_cast<unsigned int>(n)) || (j < TEST_AMOUNT); j++)
+	for (unsigned int j = 0; j < factorial(n); j++)
 	{
 		random_shuffle(cp_seq.begin(), cp_seq.end(), [&](int idx){
 			return distribution(gen) % idx; 
@@ -97,7 +110,7 @@ static std::string make_test_data([[ maybe_unused ]] int n)
 	//auto seq_cp = std::make_integer_sequence<int, TESTING_SEQUENCE_SIZE> {};
 	//ss << print_sequence(shuffled_seq) << '\n' << print_sequence(seq);
 	ss << '\n';
-	for (auto i : seq) { ss << i << ' '; }
+	for (auto i : seq) { ss << i /*<< ' '*/; }
 
 	return ss.str();
 }
@@ -157,10 +170,10 @@ static void do_work(const std::vector<Solution>& solution)
 		}
 
 		std::fstream test_file (
-			cwd.string() + '/' + OUT_DIR + '/' + filename + "_testing_data" + SUFFIX
+			cwd.string() + '/' + OUT_DIR + '/' + filename + "_testing_data" + TEST_SUFFIX
 		);
 		test_file.open(
-			cwd.string() + '/' + OUT_DIR + '/' + filename + "testing_data" + SUFFIX,
+			cwd.string() + '/' + OUT_DIR + '/' + filename + "testing_data" + TEST_SUFFIX,
 			std::ios::out
 		);
 		if (test_file.is_open())

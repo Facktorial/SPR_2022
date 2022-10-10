@@ -5,6 +5,7 @@
 #include <utility>
 #include <functional>
 #include <variant>
+#include <numeric>
 
 
 #define TEST_MODE 1
@@ -93,9 +94,8 @@ static std::string vars_unpacked(std::vector<char> vec)
 	auto output = std::accumulate(
 		vec.begin(), vec.end(), std::string(""),
 		[](std::string acc, char c) -> std::string {
-			return std::move(acc) + c + ", ";
+			return std::move(acc) + c + ",";
 	});
-	output.pop_back();
 	output.pop_back();
 
 	return output;
@@ -118,9 +118,6 @@ static std::vector<char> swap_var(std::vector<char> vec, unsigned int chidx, uns
 
 	return vec;
 }
-
-
-static int facktorial(int n) { int num = 1; int i = 1; while (i <= n){ num *= i; ++i; } return num; }
 
 
 static PrintPascalFunctions<std::string> ps_funcitons_dictionary(Pascal_Fns fn)
@@ -159,7 +156,8 @@ static PrintPascalFunctions<std::string> ps_funcitons_dictionary(Pascal_Fns fn)
 			return [](int indent_lvl, std::vector<char> vars) -> std::string {
 				return string_repeat(
 					INDENT_REPEAT * static_cast<unsigned int>(indent_lvl), INDENT
-				) + "writeln(" + vars_unpacked(vars) + ");\n";
+				//) + "writeln(" + vars_unpacked(vars) + ");\n";
+				) + "writeln(" + vars_unpacked(vars) + ")\n";
 			};
 	}
 }
@@ -171,7 +169,7 @@ static PrintClausuleFunctions<std::string> clausules_dictionary(Clausules clausu
 	{
 		case Clausules::PROGRAM:
 			return []() -> std::string {
-				return "program sort(input, output);\n";
+				return "program sort(input,output);\n";
 			};
 		case Clausules::VAR:
 			return [](std::string vars) -> std::string {
@@ -212,10 +210,6 @@ static void backtracking_sorting(
 	std::stringstream& ss, std::vector<char> parent, unsigned int idx, int depth
 )
 {
-	// -1 bc indexing from 0, -1 bc (n-1) states
-	//unsigned int if_index = idx - 1 - 1;
-	idx -= 1 + 1;
-
 	if (depth == parent.size())
 	{
 		ss << std::get<2>(clausules_dictionary(Clausules::BODY))(
@@ -224,56 +218,34 @@ static void backtracking_sorting(
 		return;
 	}
 
-	std::cout << "\nidx: " << idx << " parent: " << vars_unpacked(parent) << '\n';
-	std::cout << "depth: " << depth << " parent: " << vars_unpacked(parent) << "\n\n";
-
 	ss << std::get<2>(clausules_dictionary(Clausules::BODY))(
 		{ Pascal_Fns::IF }, depth,
 		std::string(parent[idx] + std::string(" < ") + parent[depth])
 	);
+	backtracking_sorting(ss, parent, idx + 1, depth + 1);
 
-	backtracking_sorting(ss, parent, idx, depth + 1);
+	int i = 0;
+	for (; i < depth - 1; i++)
+	{
+		parent = swap_var(parent, depth - i - 1, depth - i);
 
-	auto child = swap_var(parent, idx, depth);
+		ss << std::get<2>(clausules_dictionary(Clausules::BODY))(
+			{ Pascal_Fns::ELSE_IF }, depth,
+			//std::string(parent[depth - i - 2] + std::string(" < ") + parent[depth - i - 1])
+			std::string(parent[idx - i - 1] + std::string(" < ") + parent[depth - i - 1])
+		);
+		//backtracking_sorting(ss, parent, depth - i - 1, depth + 1);
+		backtracking_sorting(ss, parent, idx + 1, depth + 1);
+	}
 
+	auto child = swap_var(parent, 0, 1);
 	ss << std::get<2>(clausules_dictionary(Clausules::BODY))(
 		{ Pascal_Fns::ELSE }, depth,
 		std::string("")
-		//std::string(child[depth] + std::string(" > ") + parent[if_index])
 	);
-
-	backtracking_sorting(ss, child, idx, depth + 1);
-
+	//backtracking_sorting(ss, child, depth - 1, depth + 1);
+	backtracking_sorting(ss, child, idx + 1, depth + 1);
 }
-
-	// if (depth == 2)
-	// {
-	// 	ss << std::get<2>(clausules_dictionary(Clausules::BODY))({ Pascal_Fns::IF }, depth, vars);
-	// 	//ss << std::get<2>(clausules_dictionary(Clausules::BODY))({ Pascal_Fns::WRITELN }, depth + 1, vars);
-	// 	ss << std::get<2>(clausules_dictionary(Clausules::BODY))({ Pascal_Fns::ELSE }, depth , vars);
-	// 	//ss << std::get<2>(clausules_dictionary(Clausules::BODY))({ Pascal_Fns::WRITELN }, depth + 1, s_vars);
-	// }
-
-	// while (if_index >= 0)
-	// while (if_index >= 0)
-	// while (if_index >= 0)
-	// {
-	// 	if (!if_index && var_size > 1)
-	// 	{
-	// 		ss << std::get<2>(clausules_dictionary(Clausules::BODY))(
-	// 			{ Pascal_Fns::WRITELN },
-	// 			depth + 1,
-	// 			vars
-	// 		);
-	// 	}
-
-	// 	// TODO
-	// 	//std::string expr = make_expr_string(......);
-	// 	// TODO
-	// 	// int indent_lvl = get_indentation ???
-	// 	ss << std::get<2>(clausules_dictionary(Clausules::BODY))({ Pascal_Fns::WRITELN }, depth + 1, vars);
-	// }
-//}
 
 
 static void backtracking_sorting_initial(std::stringstream& ss, unsigned int var_size)
@@ -283,16 +255,20 @@ static void backtracking_sorting_initial(std::stringstream& ss, unsigned int var
 	std::vector<char> vars = make_vec_variables(var_size);
 	
 	int depth = 1;
+	
+	ss << std::get<2>(
+			clausules_dictionary(Clausules::BODY)
+		)({ Pascal_Fns::READLN }, depth, vars);
 
 	if (var_size == 1) 
 	{
 		ss << std::get<2>(
 				clausules_dictionary(Clausules::BODY)
-			)({ Pascal_Fns::READLN, Pascal_Fns::WRITELN }, depth, vars);
+			)({ Pascal_Fns::WRITELN }, depth, vars);
 		return;
 	}
 
-	backtracking_sorting(ss, vars, var_size, depth);
+	backtracking_sorting(ss, vars, 0, depth);
 }
 
 
@@ -360,10 +336,13 @@ int main()
 	do_work(solution);
 #else
 	auto input = read_input();
+
 	const auto solution = solve(input);
 
+	int i = 0;
 	for (const auto& content : solution)
 	{
+		// std::cout << content << ((i++ != solution.size() - 1) ? "\n" : "");
 		std::cout << content << '\n';
 	}
 #endif

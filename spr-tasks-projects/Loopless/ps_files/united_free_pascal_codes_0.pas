@@ -1,10 +1,8 @@
-program sort(input, output);
+program sort(input,output);
 var
-a,b : integer;
+a : integer;
 begin
-  if a < b then
-    writeln(a, b);
-  else
-    writeln(b, a);
+  readln(a);
+  writeln(a)
 end.
 

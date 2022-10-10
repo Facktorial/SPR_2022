@@ -8,11 +8,11 @@ def test_compile(): #(n_compiled: int, programs: list[str]):
 
 def test_results():
     data = parse_sort_test()
-    # inputs = [ x for (x, _) in data ]
-    # outputs = [ x for (_, x) in data ]
-    # FIXME
-    inputs = [ x.test_inputs for inps in data for x in inps ]
+    inputs = [ x.test_inputs for x in data ]
+    outputs = [ x.test_result for x in data ]
+    # print("inputs:\n", inputs)
     computed_outputs = programs_output(inputs)
+    print("outputs:\n", computed_outputs)
 
     for computed, given in zip(computed_outputs, outputs):
         print(computed, "   ", given)
