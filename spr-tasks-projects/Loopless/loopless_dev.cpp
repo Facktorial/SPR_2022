@@ -8,7 +8,7 @@
 #include <numeric>
 
 
-#define TEST_MODE 1
+#define TEST_MODE 0
 
 
 #if TEST_MODE
@@ -301,8 +301,10 @@ static Input read_input()
 	std::getline(std::cin, line); // reads "\n"
 	std::getline(std::cin, line); // reads "\n"
 
-	while(getline(std::cin, line))
+	while(getline(std::cin, line) && vars.size() < i)
 	{
+		//while (std::cin.peek() == '\n') { getchar(); }
+		if (line == "") { continue; }
 		sscanf(line.c_str(), "%d\n", &n_vars);
 		vars.push_back(n_vars);
 	}
@@ -342,8 +344,8 @@ int main()
 	int i = 0;
 	for (const auto& content : solution)
 	{
-		// std::cout << content << ((i++ != solution.size() - 1) ? "\n" : "");
-		std::cout << content << '\n';
+		std::cout << content << ((i++ != solution.size() - 1) ? "\n" : "");
+		// std::cout << content << '\n';
 	}
 #endif
 
