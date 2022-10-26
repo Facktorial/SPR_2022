@@ -71,7 +71,7 @@ static std::vector<T> swap(std::vector<T> parent, unsigned int i, unsigned int j
 	return parent;
 }
 
-static double backtracking(int idx, int depth, std::vector<double> circles, const std::vector<std::vector<double>>& precompute_distances, std::vector<unsigned int> index_map)
+static double backtracking(int idx, int depth, std::vector<double> circles, const std::vector<std::vector<double>>& precomputed_distances, std::vector<unsigned int> index_map)
 {
 	double output = std::numeric_limits<double>::max();
 
@@ -88,15 +88,12 @@ static double backtracking(int idx, int depth, std::vector<double> circles, cons
 					local_tmp,
 					std::max(
 						circles[i],
-						//tmp[j] + x_distance(circles[i], circles[j])
-						tmp[j] + precompute_distances[index_map[j]][index_map[i]]
+						tmp[j] + precomputed_distances[index_map[j]][index_map[i]]
 					)
 				);
-				//PRINT("local", local_tmp)
 			}
 			tmp[i] = std::max(circles[i], local_tmp);
 		}
-		//FOR_PRINT("tmp", tmp)
 
 		std::vector<double> out;
 		std::transform(
@@ -106,8 +103,6 @@ static double backtracking(int idx, int depth, std::vector<double> circles, cons
 				}
 		);
 
-		//FOR_PRINT("out", out)
-		//PRINT("bottom", *(std::max_element(out.begin(), out.end())))
 		return *(std::max_element(out.begin(), out.end()));
 	}
 
@@ -130,7 +125,6 @@ static double backtracking(int idx, int depth, std::vector<double> circles, cons
 static double solve(std::vector<double> vec)
 {
 	std::vector<std::vector<double>> precompute_distances = std::vector(vec.size(), std::vector<double>(vec.size(), 0));
-	//std::vector<std::vector<double>> precompute_distances = std::vector(vec.size(), std::vector<double>(vec.size(), std::numeric_limits<double>::max()));
 
 	for (unsigned int j = 0; j < vec.size(); j++)
 	{

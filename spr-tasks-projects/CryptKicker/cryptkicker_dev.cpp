@@ -104,7 +104,9 @@ static Words_type get_words_of_nlenght(
 {
 	Words_type words;
 	if (!root) { return {}; }
+	
 	if (depth > n) { return words; }
+
 	if (root->is_leaf && depth == n) { words.push_back(acc); }
 
 	for (auto [token, child] : root->childs)
@@ -120,6 +122,7 @@ static std::set<unsigned int> get_words_length(Trie* root, unsigned int depth)
 {
 	std::set<unsigned int> lenghts;
 	if (!root) { return {}; }
+	
 	if (root->is_leaf) { lenghts.insert(depth); }
 
 	for (auto [token, child] : root->childs)
@@ -133,10 +136,10 @@ static std::set<unsigned int> get_words_length(Trie* root, unsigned int depth)
 
 struct MinedTrie
 {
-	MinedTrie(Words_type&& ws)
-		: words(std::move(ws)), trie(new Trie()), count_words(words.size())
+	MinedTrie(Words_type ws)
+		: trie(new Trie())
 	{
-		for (const auto& word : words) { insert_trie(trie, word); }
+		for (const auto& word : ws) { insert_trie(trie, word); }
 		lenghts = set_to_vec<unsigned int>(get_words_length(trie, 0));
 		//print_trie(trie, 0, true);
 	}
@@ -144,10 +147,8 @@ struct MinedTrie
 	~MinedTrie() { delete trie; }
 
 	Trie* trie;
-	//std::unordered_map<unsigned int, Words_type> words;
-	Words_type words;
+	std::unordered_map<unsigned int, Words_type> words;
 	std::vector<unsigned int> lenghts;
-	unsigned int count_words;
 };
 
 
@@ -159,6 +160,7 @@ struct Input
 	Words_type words;
 	std::vector<Words_type> decrypt_inputs;
 };
+
 
 static Input read_input()
 {
@@ -211,44 +213,66 @@ static bool check_alphabet(MinedTrie& root, Alphabet alphabet, Words_type words)
 	return true;
 }
 
-static Alphabet get_alternated_dict(MinedTrie* root, std::string word, Alphabet dict)
+// static Alphabet& get_new_alphabet(Alphabet dict, std::pair<char, char> change)
+// {
+// 	dict[change.first] = change.second;
+// 	// dict.insert_or_assign(change.first, change.second);
+// 	std::cout << change.first << " -> " << change.second << '\n';
+// 	FOR_DICT_PRINT("", dict)
+// 	return dict;
+// }
+// 
+// static Alphabet swap_dict(Alphabet parent, unsigned int i, unsigned int j)
+// {
+// 	return get_new_alphabet(parent, { 
+// 		FIRST_TOKEN + i % ALPHABET_SIZE,
+// 		FIRST_TOKEN + j % ALPHABET_SIZE
+// 	});
+// }
+
+// static Encrypt_sol backtracking(
+// 		unsigned int idx, unsigned int depth, Words_type words, Alphabet dict,
+// 		MinedTrie& root
+// )
+// {
+// 	//if (depth == words.size())
+// 	if (depth == ALPHABET_SIZE)
+// 	{
+// 		return { check_alphabet(root, dict, words), dict };
+// 	}
+// 
+// 	Encrypt_sol encrypt_sol = backtracking(idx + 1, depth + 1, words, dict, root);
+// 	if (encrypt_sol.first) { return { true, encrypt_sol.second }; }
+// 	
+// 	for (unsigned int i = 0; i < depth - 1; i++)
+// 	{
+// 		dict = swap_dict(dict, depth - i - 1, depth - i);
+// 		encrypt_sol = backtracking(idx + 1, depth + 1, words, dict, root);
+// 		if (encrypt_sol.first) { return { true, encrypt_sol.second }; }
+// 	}
+// 	
+// 	dict = swap_dict(dict, 0, 1);
+// 	encrypt_sol = backtracking(idx + 1, depth + 1, words, dict, root);
+// 	if (encrypt_sol.first) { return { true, encrypt_sol.second }; }
+// 
+// 	return { check_alphabet(root, dict, words), dict };
+// }
+
+static Encrypt_sol find_decryption(MinedTrie* root, Words_type words, Alphabet dict, unsigned int depth)
 {
-	for (auto token : )
+	if (check_alphabet(root, dict, words)) { return { true, dict }; }
 
-	return new_dict;
-}
+	if (depth == words.size()) { return { check_alphabet(root, dict, words), dict }; }
 
-static Encrypt_sol backtracking(
-		MinedTrie* root, Words_type words, Alphabet dict, unsigned int depth)
-{
-	bool is_valid = check_alphabet(root, dict, words);
-	if (depth == words.size()) { return { is_valid, dict }; }
 
-	if (is_valid) { return { true, dict }; }
 
- 	dict = swap_dict(dict, 0, 1); // TODO
-	std::vector<bool> options (root.count_words);
-	// TODO
 
-	for (unsigned int i = 0; i < root.count_words; i++)
-	{
-		if (!options[i]) { continue; } // FIXME
-		if (!is_valid(i, depth)) { continue; } // FIXME
 
-		std::vector<int> indices(....);
-		set_in_table(i, depth, indices, ...);
+	if () { dict = get_default_dict(); }
 
-		if (!inconsistent())
-		{
-			auto encrypt_sol = backtracking(root, words, dict, depth + 1);
-			is_valid = encrypt_sol.first;
-			dict = encrypt_sol.second;
-			break;
-		}
-		remove_from_table(indices, number);
-	}
- 
-	return { is_valid, dict };
+	for (auto word : words) {}
+
+	return { check_alphabet(root, dict, words), dict };
 }
 
 static Alphabet get_default_dict()
@@ -266,22 +290,24 @@ static std::string solve(MinedTrie& root, Words_type words)
 {
 	std::stringstream ss;
 	Words_type sorted_words;
-	sorted_words.reserve(words.size());
+	words.reserve(words.size());
 	std::copy(words.begin(), words.end(), std::back_inserter(sorted_words));
 
 	std::sort(sorted_words.begin(), sorted_words.end(),
-		[](auto item1, auto item2) -> bool { return item1.size() > item2.size(); }
-	);
+		[](auto item1, auto item2) -> bool {
+			return item1.size() > item2.size();
+	});
 
-	Alphabet astrerix_dict = get_default_dict;
+	Alphabet astrerix_dict;
 	Alphabet default_dict = get_default_dict();
-	for (auto& item : astrerix_dict) { item = '*'; }
+	for (auto [token, value] : default_dict) 
+	{
+		astrerix_dict.insert({token, '*'});
+	}
 	FOR_DICT_PRINT("alphabet", default_dict)
 	FOR_PRINT("sorted_words", sorted_words)
 
-	/////////////////////// backtracking called //////////////////////////////////
-	auto [is_valid, dict] = backtracking(root, sorted_words, default_dict, 0);
-	/////////////////////// backtracking called //////////////////////////////////
+	auto [is_valid, dict] = backtracking(0, 0, sorted_words, default_dict, root);
 
 	for (auto i = 0; auto word : words)
 	{
@@ -296,7 +322,8 @@ static std::string solve(MinedTrie& root, Words_type words)
 int main()
 {
 	auto input = read_input();
-	MinedTrie root = MinedTrie(std::mover(input.words));
+
+	MinedTrie root = MinedTrie(input.words);
 	
 	int lim = input.decrypt_inputs.size() - 1;
 	int i = 0;
