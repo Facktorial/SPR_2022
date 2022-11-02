@@ -3,7 +3,7 @@
 
 C++20 Project of tasks from SPR course at VSB-TUO, 2022 
 With C++11 variant of solution.
-Tested with "doctest.h".
+Tested with "doctest.h", sometimes, once i used pytest a python script, morelikely i provide only some sample of inputs and outputs.
 
 ## Overview
 
