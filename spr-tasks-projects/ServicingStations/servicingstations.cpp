@@ -16,11 +16,11 @@
 #define FOR_DICT_PRINT(s, items) for (auto x : items) { PRINT(x.first, x.second) }
 
 using Edge = std::pair<size_t, size_t>;
-using Edges = std::vector<std::pair<size_t, size_t>>;
+using Edges = std::vector<Edge>;
 
 struct Input
 {
-	Input(Edges&& vec, std::pair<size_t, size_t> p) : edges(std::move(vec)), descr(p) {}
+	Input(Edges&& vec, std::pair<size_t, size_t> p) : edges(std::move(vec)), descr(p){}
 	Edges edges;
 	std::pair<size_t, size_t> descr;
 };
@@ -30,18 +30,12 @@ static std::pair<bool, Input> read_input()
 	size_t i, j;
 	std::cin >> i >> j;
 	std::pair<size_t, size_t> descr { i, j };
+
 	Edges edges;
 	edges.reserve(j);
-	if (!i && !j)
-	{
-		return std::make_pair<bool, Input>(true, Input(std::move(edges), descr));
-	}
-	if (!j) // FIXME
-	{
-		return std::make_pair<bool, Input>(false, Input(std::move(edges), descr));
-	}
-	bool truly_stop = false;
+	if (!i && !j) { return std::make_pair<bool, Input>(true, Input({}, descr)); }
 
+	bool truly_stop = false;
 	while ( !0 )
 	{
 		std::cin >> i >> j;
@@ -172,8 +166,8 @@ struct Graph
 					//--neighbor->v_value;
 				}
 			//}
-			WATCH(currentVertex->v_index)
-			WATCH(count_stations)
+			//WATCH(currentVertex->v_index)
+			//WATCH(count_stations)
 			for (auto& neighbor : currentVertex->v_neighbors)
 			{
 				if (neighbor->v_exploration == Vertex::Explore::UNSEEN)
@@ -188,20 +182,84 @@ struct Graph
 		return count_stations;
 	}
 
+	void reset_state(Component comp)
+	{
+		for (auto& item : comp)
+		{
+			item->v_exploration = Vertex::Explore::UNSEEN;
+			item->v_serviced = false;
+		}
+	}
+
+	void reset_state_map(std::map<size_t, Vertex*> map)
+	{
+		for (auto& [_, item] : map)
+		{
+			item->v_exploration = Vertex::Explore::UNSEEN;
+			item->v_serviced = false;
+		}
+	}
+
+	using Component = std::vector<Vertex*>;
+
+	Component get_component(size_t start)
+	{
+		Component cs;
+
+		Vertex* currentVertex = m_vertexMap[m_sorted_keys[start]];
+		std::queue que;
+		que.push(currentVertex);
+
+		while (!que.empty())
+		{
+			currentVertex = que.top();
+			que.pop();
+
+			currentVertex->v_exploration = Vertex::Explore::OPEN;
+			cs.push_back(currentVertex);
+
+			for (auto& neighbor : currentVertex->v_neighbors)
+			{
+				if (neighbor->v_exploration == Vertex::Explore::UNSEEN)
+				{
+					neighbor->v_exploration = Vertex::Explore::OPEN;
+					que.push(neighbor);
+				}
+			}
+			currentVertex->v_exploration = Vertex::Explore::CLOSED;
+		}
+
+		return cs;
+	}
+
 	T BFS_stationning_bactracking(size_t start)
 	{
 		T count_stations = std::numeric_limits<T>::max();
-		std::vector<bool> to_restore_is_servicing (m_sorted_keys);
-		std::vector<size_t> to_restore_value;
+		// std::vector<bool> to_restore_is_servicing();
+		// to_restore_is_servicing.reserve(m_sorted_keys.size());
+		// std::vector<size_t> to_restore_value;
+		// to_restore_value.reserve(m_sorted_keys.size());
 
+		std::vector<Component> components;
+		for (size_t idx = 0; idx < m_sorted_keys.size(); idx++)
+		{
+			auto vertex = m_vertexMap[m_sorted_keys[jdx]];
+			if (vertex->v_exploration == Vertex::Explore::UNSEEN)
+			{
+				components.push_back(get_component(idx));
+			}
+		}
+		
+		reset_state_map(m_vertexMap);
+
+		for (auto& component : components)
+		{
+
+		}
+		
 		for (size_t idx = 0; idx < m_sorted_keys.size(); idx++)
 		{
 			T acc = 0;
-			for (auto& [_, item] : m_vertexMap)
-			{
-				item->v_exploration = Vertex::Explore::UNSEEN;
-				item->v_serviced = false;
-			}
 
 			for (size_t jdx = 0; jdx < m_sorted_keys.size(); jdx++)
 			{
@@ -210,11 +268,11 @@ struct Graph
 				if (vertex->v_exploration == Vertex::Explore::UNSEEN)
 				{
 					acc += BFS_stationning_internal(idx);
-					PRINT("global count stations", acc)
+					//PRINT("global count stations", acc)
 				}
 			}
-			WATCH(count_stations)
-			WATCH(acc)
+			//WATCH(count_stations)
+			//WATCH(acc)
 			count_stations = std::min(count_stations, acc);
 		}
 		return count_stations;
@@ -241,43 +299,27 @@ InputGraphs<T> read_inputs()
 
 	auto input = read_input();
 	if (input.first) { return std::move(graphs); }
-	graphs.push_back(Graph<T>(std::move(input.second.edges), input.second.descr));
+	graphs.emplace_back(Graph<T>(std::move(input.second.edges), input.second.descr));
 	
 	while ( std::cin.peek() == '\n') //  input.edges.empty())
 	{
 		std::cin.get();
 		input = read_input();
-		if (!input.second.descr.first && !input.second.descr.second)
-		{
-			return std::move(graphs);
-		}
-		graphs.push_back(Graph<T>(std::move(input.second.edges), input.second.descr));
+		if (!input.second.descr.first && !input.second.descr.second) { return std::move(graphs); }
+
+		graphs.emplace_back(Graph<T>(std::move(input.second.edges), input.second.descr));
 		if (input.first) { return std::move(graphs); }
 	}
 	return std::move(graphs);
 }
 
-
-template <typename T>
-std::string solve(Graph<T>& graph)
-{
-	std::stringstream ss;
-	// for (auto vertex : graph.m_vertexMap)
-	// {
-	// 	std::cout << vertex.first << ": " << vertex.second->v_value << '\n';
-	// }
-	// FOR_PRINT("sorted_keys: ", graph.m_sorted_keys)
-	const auto count_stations = graph.BFS_stationning();
-	ss << std::to_string(count_stations);
-
-	return ss.str();
-}
-
 int main()
 {
 	InputGraphs<size_t> graphs = read_inputs<size_t>();
-	for (auto& graph : graphs) { std::cout << solve(graph) << '\n'; }
-
+	for (auto& graph : graphs)
+	{
+		std::cout << std::to_string(graph.BFS_stationning()) << '\n';
+	}
 	return 0;
 }
 
